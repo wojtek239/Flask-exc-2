@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import sqlite3
 
 app = Flask(__name__)
@@ -22,9 +22,21 @@ def create_table():
 create_table()
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return "Welcome in notes app!"
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO notes (title, content) VALUES (?, ?)', (title, content))
+        conn.commit()
+        conn.close()
+
+        return jsonify({'message': 'Note added successfully'}), 201
+
+    return render_template('index.html')
 
 
 @app.route('/add_note', methods=['POST'])
