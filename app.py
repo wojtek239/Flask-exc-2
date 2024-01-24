@@ -1,20 +1,20 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 import sqlite3
 
 app = Flask(__name__)
-DB_NAME = 'notes.db'
+DB_NAME = 'xd.db'
 
 
 def create_table():
     conn = sqlite3.connect(DB_NAME)
+    print(conn.total_changes)
     cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS notes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            content TEXT NOT NULL
-        )
-    ''')
+    command = (
+         "CREATE TABLE IF NOT EXISTS notes "
+         "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+         "title TEXT NOT NULL, content TEXT NOT NULL)"
+    )
+    cursor.execute(command)
     conn.commit()
     conn.close()
 
@@ -75,7 +75,7 @@ def get_notes():
     conn.close()
 
     notes_list = [{'id': note[0], 'title': note[1], 'content': note[2]} for note in notes]
-    return jsonify({'notes': notes_list})
+    return jsonify({'notes': notes_list}), 200
 
 
 @app.route('/edit_note/<int:note_id>', methods=['PUT'])
